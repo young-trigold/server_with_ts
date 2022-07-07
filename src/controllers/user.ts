@@ -21,7 +21,7 @@ const register = async (req: Request, res: Response) => {
       });
 
       await newUser.save();
-      res.status(200).json(newUser);
+      res.status(200).json({ message: '注册成功!' });
     }
   } catch (error) {
     if (error instanceof Error)
@@ -29,7 +29,7 @@ const register = async (req: Request, res: Response) => {
   }
 };
 
-const createToken = (id: string) => jwt.sign({ id }, process.env.JWT_SECRET!, { expiresIn: '3d' });
+const createToken = (id: string) => jwt.sign({ id }, process.env.JWT_SECRET!, { expiresIn: '7d' });
 
 const login = async (req: Request, res: Response) => {
   try {
