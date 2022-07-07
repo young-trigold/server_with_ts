@@ -2,12 +2,15 @@
 import { Request, Response } from 'express';
 import fsPromise from 'fs/promises';
 import path from 'path';
+import * as url from 'url';
 
 import Chapter from '../models/chapter.js';
 import Comment from '../models/comment.js';
 import Note from '../models/note.js';
 import { ChapterInfo, NoteInfo } from '../types/index.js';
 import isRelated from '../utils/isRelated.js';
+
+const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
 const getNotes = async (req: Request, res: Response) => {
   try {

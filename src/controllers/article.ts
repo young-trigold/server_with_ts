@@ -1,10 +1,14 @@
 import { Request, Response } from 'express';
 import fsPromise from 'fs/promises';
+import os from 'os';
 import path from 'path';
+import * as url from 'url';
 
 import Article from '../models/article.js';
 import Comment from '../models/comment.js';
 import isRelated from '../utils/isRelated.js';
+
+const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
 const getArticles = async (req: Request, res: Response) => {
   const { keyword } = req.query;
@@ -43,7 +47,10 @@ const getArticle = async (req: Request, res: Response) => {
     ).populate({ path: 'comments', populate: { path: 'user', model: 'User' } });
 
     if (article) {
-      const buffers = await fsPromise.readFile(path.resolve(__dirname, '../', article.url));
+      const articleURL = path.resolve(__dirname, '../', article.url);
+      const articleNormalized =
+        os.platform() === 'win32' ? articleURL.replace(/\//g, '\\') : articleURL;
+      const buffers = await fsPromise.readFile(articleNormalized);
 
       res.status(200).json({ comments: article.comments, content: buffers.toString() });
     } else {
@@ -84,7 +91,8 @@ const deleteArticle = async (req: Request, res: Response) => {
   const { user } = req;
   const { articleId } = req.params;
 
-  if (user.role === 'admin') {
+  if (user.role !== 'admin') res.status(401).json({ message: '权限不足!' });
+  else {
     try {
       Article.findByIdAndRemove(articleId).then((article) => {
         if (article) {
@@ -99,8 +107,6 @@ const deleteArticle = async (req: Request, res: Response) => {
       if (error instanceof Error)
         res.status(500).json({ message: '服务器错误!', stack: error.stack });
     }
-  } else {
-    res.status(401).json({ message: '权限不足!' });
   }
 };
 

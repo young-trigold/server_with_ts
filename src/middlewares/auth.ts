@@ -11,7 +11,8 @@ const protect = async (req: Request, res: Response, next: NextFunction) => {
       const token = req.headers.authorization.split(' ')[1];
 
       const decodedUser = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
-      req.user = decodedUser.id;
+
+      req.user = JSON.parse(decodedUser.id);
       next();
     }
   } catch (error) {
