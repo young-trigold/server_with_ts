@@ -1,8 +1,8 @@
 import { Router } from 'express';
 
-import articleController from '../controllers/article';
-import upload from '../middlewares/upload';
-import protect from '../middlewares/auth';
+import articleController from '../controllers/article.js';
+import upload from '../middlewares/upload.js';
+import protect from '../middlewares/auth.js';
 
 const articleApi = Router();
 

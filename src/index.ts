@@ -6,10 +6,10 @@ import dotenv from 'dotenv';
 import express from 'express';
 import morgan from 'morgan';
 
-import articleApi from './apis/article';
-import noteApi from './apis/note';
-import userApi from './apis/user';
-import connectingToDB from './db';
+import articleApi from './apis/article.js';
+import noteApi from './apis/note.js';
+import userApi from './apis/user.js';
+import connectingToDB from './db.js';
 
 dotenv.config();
 

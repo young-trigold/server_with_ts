@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
-import userController from '../controllers/article';
-import protect from '../middlewares/auth';
+import userController from '../controllers/user.js';
+import protect from '../middlewares/auth.js';
 
 const userApi = Router();
 

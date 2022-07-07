@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import User from '../models/user';
+import User from '../models/user.js';
 
 const register = async (req: Request, res: Response) => {
   const { name, pwd } = req.body;
@@ -29,7 +29,7 @@ const register = async (req: Request, res: Response) => {
   }
 };
 
-const createToken = (id: string) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+const createToken = (id: string) => jwt.sign({ id }, process.env.JWT_SECRET!, { expiresIn: '3d' });
 
 const login = async (req: Request, res: Response) => {
   try {
@@ -37,11 +37,11 @@ const login = async (req: Request, res: Response) => {
     const user = await User.findOne({ name });
 
     if (user) {
-      const isPass = await bcrypt.compare(pwd, user.pwd);
+      const isPass = await bcrypt.compare(pwd, user.pwd!);
 
       if (isPass) {
         res.status(200).json({
-          token: createToken({ id: user._id, role: user.role, name: user.name }),
+          token: createToken(JSON.stringify({ id: user._id, role: user.role, name: user.name })),
         });
       } else {
         res.status(401).json({ message: '密码不匹配!' });

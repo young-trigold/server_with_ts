@@ -1,8 +1,8 @@
 import { Router } from 'express';
 
-import noteController from '../controllers/article';
-import protect from '../middlewares/auth';
-import upload from '../middlewares/upload';
+import noteController from '../controllers/note.js';
+import protect from '../middlewares/auth.js';
+import upload from '../middlewares/upload.js';
 
 const noteApi = Router();
 

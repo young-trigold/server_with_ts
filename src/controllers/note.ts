@@ -1,11 +1,13 @@
+/* eslint-disable consistent-return */
 import { Request, Response } from 'express';
 import fsPromise from 'fs/promises';
 import path from 'path';
 
-import Chapter from '../models/chapter';
-import Comment from '../models/comment';
-import Note from '../models/note';
-import isRelated from '../utils/isRelated';
+import Chapter from '../models/chapter.js';
+import Comment from '../models/comment.js';
+import Note from '../models/note.js';
+import { ChapterInfo, NoteInfo } from '../types/index.js';
+import isRelated from '../utils/isRelated.js';
 
 const getNotes = async (req: Request, res: Response) => {
   try {
@@ -47,14 +49,13 @@ const createNote = async (req: Request, res: Response) => {
 const getChapters = async (req: Request, res: Response) => {
   try {
     const { keyword } = req.query;
-    const notes = await Note.find().populate('chapters');
-    let chapters: typeof Chapter[] = [];
+    const notes: NoteInfo[] = await Note.find().populate('chapters');
+    let chapters: ChapterInfo[] = [];
 
     notes.forEach((note) => {
       chapters = chapters.concat(note.chapters);
     });
-
-    const result = chapters.filter((chapter) => isRelated(chapter.title, keyword));
+    const result = chapters.filter((chapter) => isRelated(chapter.title, String(keyword)));
     res.status(200).json(result);
   } catch (error) {
     if (error instanceof Error)
@@ -66,7 +67,10 @@ const getChaptersByNoteId = async (req: Request, res: Response) => {
   const { noteId } = req.params;
 
   try {
-    const note = await Note.findById(noteId).populate('chapters');
+    const note: NoteInfo | null = await Note.findById(noteId).populate('chapters');
+
+    if (!note) return res.status(404).json({ message: '没有找到章节!' });
+
     const { chapters } = note;
     const sortedChapters = chapters.sort(
       (a, b) => Number.parseInt(a.title.slice(0, 2), 10) - Number.parseInt(b.title.slice(0, 2), 10),
@@ -108,10 +112,11 @@ const getChapter = async (req: Request, res: Response) => {
 
 const createChapter = async (req: Request, res: Response) => {
   const { noteId } = req.params;
+
   try {
     const newChapter = new Chapter({
-      title: req.file.originalname.split('.')[0],
-      url: req.file.destination + req.file.filename,
+      title: req?.file?.originalname?.split('.')?.[0],
+      url: String(req?.file?.destination) + String(req?.file?.filename),
     });
 
     await newChapter.save();
@@ -138,13 +143,14 @@ const deleteChapter = async (req: Request, res: Response) => {
   const { noteId, chapterId } = req.params;
 
   Chapter.findByIdAndRemove(chapterId)
-    .then((chapter) =>
+    .then((chapter) => {
+      if (!chapter) return res.status(404).json({ message: '找不到该章节!' });
       fsPromise.unlink(path.resolve(__dirname, '../', chapter.url)).then(() =>
         Note.findByIdAndUpdate(noteId, {
           $pull: { chapters: { _id: chapterId } },
         }).then(() => res.status(200).json({ message: '删除成功!' })),
-      ),
-    )
+      );
+    })
     .catch((error) => {
       if (error instanceof Error)
         res.status(500).json({ message: '服务器错误!', stack: error.stack });

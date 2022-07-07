@@ -2,9 +2,9 @@ import { Request, Response } from 'express';
 import fsPromise from 'fs/promises';
 import path from 'path';
 
-import Article from '../models/article';
-import Comment from '../models/comment';
-import isRelated from '../utils/isRelated';
+import Article from '../models/article.js';
+import Comment from '../models/comment.js';
+import isRelated from '../utils/isRelated.js';
 
 const getArticles = async (req: Request, res: Response) => {
   const { keyword } = req.query;
@@ -57,8 +57,8 @@ const getArticle = async (req: Request, res: Response) => {
 
 const createArticle = async (req: Request, res: Response) => {
   const newArticle = new Article({
-    title: `${req.file.originalname.split('.')[0]}`,
-    url: `${req.file.destination}${req.file.filename}`,
+    title: `${req?.file?.originalname.split('.')[0]}`,
+    url: `${req?.file?.destination}${req?.file?.filename}`,
     tag: `${req.body.tag}`,
     likes: 0,
     views: 0,
@@ -66,7 +66,7 @@ const createArticle = async (req: Request, res: Response) => {
 
   try {
     const articleWithSameTitle = await Article.findOne({
-      title: `${req.file.originalname.split('.')[0]}`,
+      title: `${req?.file?.originalname.split('.')[0]}`,
     });
     if (articleWithSameTitle) {
       res.status(409).json({ message: '文章已经存在!' });
