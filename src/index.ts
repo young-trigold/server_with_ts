@@ -1,5 +1,6 @@
 import path from 'path';
 
+import * as url from 'url';
 import compression from 'compression';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -14,6 +15,7 @@ import connectingToDB from './db.js';
 dotenv.config();
 
 const { log } = console;
+const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
 const server = express();
 
